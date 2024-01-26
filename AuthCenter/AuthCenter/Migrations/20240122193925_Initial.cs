@@ -12,6 +12,18 @@ namespace AuthCenter.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "AspNetPermissions",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetPermissions", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetRoles",
                 columns: table => new
                 {
@@ -67,13 +79,13 @@ namespace AuthCenter.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "AccessToken",
+                name: "AspNetAccessTokens",
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
                     ApplicationName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
                     TokenName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
-                    Token = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
+                    Token = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
                     Secret = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
                     InActive = table.Column<bool>(type: "bit", nullable: false),
                     RoleId = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
@@ -84,9 +96,9 @@ namespace AuthCenter.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AccessToken", x => x.Id);
+                    table.PrimaryKey("PK_AspNetAccessTokens", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_AccessToken_AspNetRoles_RoleId",
+                        name: "FK_AspNetAccessTokens_AspNetRoles_RoleId",
                         column: x => x.RoleId,
                         principalTable: "AspNetRoles",
                         principalColumn: "Id",
@@ -108,6 +120,30 @@ namespace AuthCenter.Migrations
                     table.PrimaryKey("PK_AspNetRoleClaims", x => x.Id);
                     table.ForeignKey(
                         name: "FK_AspNetRoleClaims_AspNetRoles_RoleId",
+                        column: x => x.RoleId,
+                        principalTable: "AspNetRoles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetRolePermissions",
+                columns: table => new
+                {
+                    RoleId = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
+                    PermissionId = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetRolePermissions", x => new { x.RoleId, x.PermissionId });
+                    table.ForeignKey(
+                        name: "FK_AspNetRolePermissions_AspNetPermissions_PermissionId",
+                        column: x => x.PermissionId,
+                        principalTable: "AspNetPermissions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AspNetRolePermissions_AspNetRoles_RoleId",
                         column: x => x.RoleId,
                         principalTable: "AspNetRoles",
                         principalColumn: "Id",
@@ -200,14 +236,19 @@ namespace AuthCenter.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_AccessToken_RoleId",
-                table: "AccessToken",
+                name: "IX_AspNetAccessTokens_RoleId",
+                table: "AspNetAccessTokens",
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
                 column: "RoleId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AspNetRolePermissions_PermissionId",
+                table: "AspNetRolePermissions",
+                column: "PermissionId");
 
             migrationBuilder.CreateIndex(
                 name: "RoleNameIndex",
@@ -248,10 +289,13 @@ namespace AuthCenter.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "AccessToken");
+                name: "AspNetAccessTokens");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
+
+            migrationBuilder.DropTable(
+                name: "AspNetRolePermissions");
 
             migrationBuilder.DropTable(
                 name: "AspNetUserClaims");
@@ -267,6 +311,9 @@ namespace AuthCenter.Migrations
 
             migrationBuilder.DropTable(
                 name: "Company");
+
+            migrationBuilder.DropTable(
+                name: "AspNetPermissions");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

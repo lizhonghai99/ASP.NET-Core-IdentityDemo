@@ -11,7 +11,6 @@ namespace AuthCenter.Controllers.API
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(AuthenticationSchemes = "Bearer, Cookies")]
     public class AuthController : ControllerBase
     {
         private IConfiguration _config;
@@ -26,42 +25,43 @@ namespace AuthCenter.Controllers.API
             _authService = authService;
         }
 
-        //[HttpPost(nameof(GenerateToken), Name = nameof(GenerateToken))]
-        //public async Task<IActionResult> GenerateToken([FromBody] AuthRequest input)
-        //{
-        //    if (ModelState.IsValid)
-        //    {
-        //        var authResult = await _authService.GenerateTokenByUser(input);
-        //        if (authResult.IsSuccess)
-        //            return Ok(authResult);
-        //        else
-        //        {
-        //            ModelState.AddModelError("Error", authResult.Message);
-        //            return BadRequest(ModelState);
-        //        }
+        [HttpPost(nameof(GenerateToken), Name = nameof(GenerateToken))]
+        public async Task<IActionResult> GenerateToken([FromBody] AuthRequest input)
+        {
+            if (ModelState.IsValid)
+            {
+                var authResult = await _authService.GenerateTokenByUser(input);
+                if (authResult.IsSuccess)
+                    return Ok(authResult);
+                else
+                {
+                    ModelState.AddModelError("Error", authResult.Message);
+                    return BadRequest(ModelState);
+                }
 
-        //    }
-        //    return BadRequest(ModelState);
+            }
+            return BadRequest(ModelState);
 
-        //}
+        }
 
 
-        //[HttpPost(nameof(GenerateTokenByRole), Name = nameof(GenerateTokenByRole))]
-        //public async Task<IActionResult> GenerateTokenByRole(string roleId)
-        //{
-        //    var authResult = await _authService.GenerateTokenByRole(roleId);
-        //    if (authResult.IsSuccess)
-        //        return Ok(authResult);
-        //    else
-        //    {
-        //        ModelState.AddModelError("Error", authResult.Message);
-        //        return BadRequest(ModelState);
-        //    }
-        //}
+        [HttpPost(nameof(GenerateTokenByRole), Name = nameof(GenerateTokenByRole))]
+        public async Task<IActionResult> GenerateTokenByRole(string roleId)
+        {
+            var authResult = await _authService.GenerateTokenByRole(roleId);
+            if (authResult.IsSuccess)
+                return Ok(authResult);
+            else
+            {
+                ModelState.AddModelError("Error", authResult.Message);
+                return BadRequest(ModelState);
+            }
+        }
 
         [HttpGet(nameof(GetCurrentClaims))]
         public IActionResult GetCurrentClaims()
         {
+            var httpContext = this.HttpContext;
             var claims = User.Claims.ToList();
             var sb = new StringBuilder();
             claims.ForEach(t =>

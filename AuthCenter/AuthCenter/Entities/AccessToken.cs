@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AuthCenter.Entities
 {
-    [Table(nameof(AccessToken))]
+    [Table("AspNetAccessTokens")]
     public class AccessToken
     {
         [Key]
@@ -20,7 +20,7 @@ namespace AuthCenter.Entities
         public string TokenName { get; set; }
 
         [Required]
-        [MaxLength(256)]
+        [MaxLength(450)]
         public string Token { get; set; }
 
         [Required]

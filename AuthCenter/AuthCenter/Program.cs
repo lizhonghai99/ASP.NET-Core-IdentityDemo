@@ -3,10 +3,12 @@ using AuthCenter.Middlewares;
 using AuthCenter.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
@@ -33,54 +35,91 @@ namespace AuthCenter
                 options.Conventions.AuthorizeAreaFolder("Identity", "/Account/Manage");
                 options.Conventions.AuthorizeAreaPage("Identity", "/Account/Logout");
             });
-
-            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                    .AddCookie(options =>
-                    {
-                        options.LoginPath = "/Account/Login"; // 指定登录页面
-                        options.AccessDeniedPath = "/Account/AccessDenied"; // 指定拒绝访问页面
-                        options.LogoutPath = "/Account/Logout"; // 指定退出页面
-                    });
-
             var tokenSection = builder.Configuration.GetSection("Security:Token");
 
-            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options =>
-            {
-                options.SaveToken = true;
-                options.RequireHttpsMetadata = false;
-                options.TokenValidationParameters = new TokenValidationParameters
+            builder.Services.AddAuthentication()
+                .AddCookie(options =>
                 {
-                    ValidateAudience = true,
-                    ValidateLifetime = true,
-                    ValidateIssuer = true,
-                    ValidateIssuerSigningKey = true,
-                    ValidIssuer = tokenSection["Issuer"],
-                    ValidAudience = tokenSection["Audience"],
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenSection["Key"])),
-                    ClockSkew = TimeSpan.Zero
-                };
-                options.Events = new JwtBearerEvents
+                    options.LoginPath = "/Identity/Account/Login";
+                    options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+                    options.LogoutPath = "/Identity/Account/Logout";
+                }).AddJwtBearer(options =>
                 {
-                    OnTokenValidated = async context =>
-                                   {
-                                       var authService = context.HttpContext.RequestServices.GetRequiredService<IAuthService>();
-                                       await authService.ValidateToken(context);
-                                   }
-                };
-            });
+                    options.SaveToken = true;
+                    options.RequireHttpsMetadata = false;
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuer = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = tokenSection["Issuer"],
+                        ValidAudience = tokenSection["Audience"],
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenSection["Key"])),
+                        ClockSkew = TimeSpan.Zero
+                    };
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnTokenValidated = async context =>
+                        {
+                            var authService = context.HttpContext.RequestServices.GetRequiredService<IAuthService>();
+                            await authService.ValidateToken(context);
+                        }
+                    };
 
-            builder.Services.AddAuthorization(options =>
-            {
-                options.AddPolicy("ViewCompany", policy => policy.RequireRole("Admin", "User"));
-                options.AddPolicy("CreateCompany", policy => policy.RequireRole("Admin"));
-                options.AddPolicy("EditCompany", policy => policy.RequireRole("Admin"));
-                options.AddPolicy("DeleteCompany", policy => policy.RequireRole("Admin"));
-            });
+                });
+
+
+            //builder.Services.AddAuthentication(options =>
+            //{
+            //    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            //    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            //})
+            //.AddJwtBearer(options =>
+            //{
+            //    options.SaveToken = true;
+            //    options.RequireHttpsMetadata = false;
+            //    options.TokenValidationParameters = new TokenValidationParameters
+            //    {
+            //        ValidateAudience = true,
+            //        ValidateLifetime = true,
+            //        ValidateIssuer = true,
+            //        ValidateIssuerSigningKey = true,
+            //        ValidIssuer = tokenSection["Issuer"],
+            //        ValidAudience = tokenSection["Audience"],
+            //        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenSection["Key"])),
+            //        ClockSkew = TimeSpan.Zero
+            //    };
+            //    options.Events = new JwtBearerEvents
+            //    {
+            //        OnTokenValidated = async context =>
+            //                       {
+            //                           var authService = context.HttpContext.RequestServices.GetRequiredService<IAuthService>();
+            //                           await authService.ValidateToken(context);
+            //                       }
+            //    };
+            //});
+
+            //builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
+            //{
+            //    options.LoginPath = "/Identity/Account/Login";
+            //    options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+            //    options.LogoutPath = "/Identity/Account/Logout";
+            //});
+
+
+
+
 
             builder.Services.AddTransient<IEmailSender, EmailSender>();
 
             builder.Services.AddScoped<IAuthService, AuthService>();
+
+            builder.Services.AddSingleton<PermissionService>();
+
+            builder.Services.AddSingleton<IAuthorizationPolicyProvider, DynamicAuthorizationPolicyProvider>();
+
+            builder.Services.AddScoped<IAuthorizationHandler, PermissionHandler>();
 
             builder.Services.AddControllersWithViews();
 

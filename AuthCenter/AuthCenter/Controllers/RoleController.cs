@@ -49,15 +49,11 @@ namespace AuthCenter.Controllers
             return View(dto);
         }
 
-        // GET: Roles/Create
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Roles/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Name,NormalizedName")] CreateRole input)
@@ -74,7 +70,6 @@ namespace AuthCenter.Controllers
             return View(input);
         }
 
-        // GET: Roles/Edit/5
         public async Task<IActionResult> Edit(string id)
         {
             if (id == null)
@@ -94,9 +89,6 @@ namespace AuthCenter.Controllers
             return View(dto);
         }
 
-        // POST: Roles/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(string id, [Bind("Id,Name,NormalizedName")] RoleDto input)
@@ -137,7 +129,6 @@ namespace AuthCenter.Controllers
             return View(input);
         }
 
-        // GET: Roles/Delete/5
         public async Task<IActionResult> Delete(string id)
         {
             if (id == null)
@@ -153,7 +144,6 @@ namespace AuthCenter.Controllers
             return View(role);
         }
 
-        // POST: Roles/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)

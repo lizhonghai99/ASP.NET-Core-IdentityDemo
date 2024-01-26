@@ -16,7 +16,7 @@ namespace AuthCenter.Controllers.API
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin,User")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class CompanyController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -27,7 +27,7 @@ namespace AuthCenter.Controllers.API
         }
 
         [HttpGet("all")]
-        [Authorize(Policy = "ViewCompany")]
+        [Authorize(Policy = "Company-List")]
         public async Task<ActionResult<IEnumerable<CompanyViewModel>>> GetCompany()
         {
             var query = from company in _context.Company
@@ -50,7 +50,7 @@ namespace AuthCenter.Controllers.API
 
 
         [HttpGet("{id}")]
-        [Authorize(Policy = "ViewCompany")]
+        [Authorize(Policy = "Company-List")]
         public async Task<ActionResult<CompanyViewModel>> GetCompany(string id)
         {
             var query = from company in _context.Company
@@ -78,7 +78,7 @@ namespace AuthCenter.Controllers.API
 
 
         [HttpPut("{id}")]
-        [Authorize(Policy = "EditCompany")]
+        [Authorize(Policy = "Company-Edit")]
         public async Task<IActionResult> PutCompany(string id, EditCompanyViewModel input)
         {
             if (id != input.Id)
@@ -110,7 +110,7 @@ namespace AuthCenter.Controllers.API
         }
 
         [HttpPost]
-        [Authorize(Policy = "CreateCompany")]
+        [Authorize(Policy = "Company-Create")]
         public async Task<ActionResult<Company>> PostCompany(CreateCompanyViewModel input)
         {
             var company = new Company();
@@ -138,7 +138,7 @@ namespace AuthCenter.Controllers.API
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Policy = "DeleteCompany")]
+        [Authorize(Policy = "Company-Delete")]
         public async Task<IActionResult> DeleteCompany(string id)
         {
             var company = await _context.Company.FindAsync(id);

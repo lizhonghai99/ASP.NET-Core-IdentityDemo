@@ -15,7 +15,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace AuthCenter.Controllers
 {
-    [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Roles = "Admin,User")]
+    //[Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Roles = "Admin,User")]
     public class CompanyController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -25,7 +25,7 @@ namespace AuthCenter.Controllers
             _context = context;
         }
 
-        [Authorize(Policy = "ViewCompany")]
+        [Authorize(Policy = "Company-List")]
         public async Task<IActionResult> Index()
         {
             var query = from company in _context.Company
@@ -47,7 +47,7 @@ namespace AuthCenter.Controllers
             return View(result);
         }
 
-        [Authorize(Policy = "ViewCompany")]
+        [Authorize(Policy = "Company-List")]
         public async Task<IActionResult> Details(string id)
         {
             if (id == null)
@@ -79,13 +79,13 @@ namespace AuthCenter.Controllers
             return View(result);
         }
 
-        [Authorize(Policy = "CreateCompany")]
+        [Authorize(Policy = "Company-Create")]
         public IActionResult Create()
         {
             return View();
         }
 
-        [Authorize(Policy = "CreateCompany")]
+        [Authorize(Policy = "Company-Create")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Name")] CreateCompanyViewModel input)
@@ -103,7 +103,7 @@ namespace AuthCenter.Controllers
             return View(input);
         }
 
-        [Authorize(Policy = "EditCompany")]
+        [Authorize(Policy = "Company-Edit")]
         public async Task<IActionResult> Edit(string id)
         {
             if (id == null)
@@ -122,7 +122,7 @@ namespace AuthCenter.Controllers
             return View(dto);
         }
 
-        [Authorize(Policy = "EditCompany")]
+        [Authorize(Policy = "Company-Edit")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(string id, [Bind("Id,Name")] EditCompanyViewModel input)
@@ -159,7 +159,7 @@ namespace AuthCenter.Controllers
             return View(input);
         }
 
-        [Authorize(Policy = "DeleteCompany")]
+        [Authorize(Policy = "Company-Delete")]
         public async Task<IActionResult> Delete(string id)
         {
             if (id == null)
@@ -190,7 +190,7 @@ namespace AuthCenter.Controllers
             return View(result);
         }
 
-        [Authorize(Policy = "DeleteCompany")]
+        [Authorize(Policy = "Company-Delete")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
